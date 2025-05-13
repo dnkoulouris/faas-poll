@@ -31,9 +31,22 @@ git clone https://github.com/dnkoulouris/faas-poll.git
 cd faas-poll
 ```
 
-### 2. Run locally
+### 2. Setup FlutterFire CLI
+```bash
+dart pub global activate flutterfire_cli
+flutterfire configure
+```
+
+### 3. Run locally
 ```bash
 flutter run -d chrome
+```
+
+### 4. Setup Firebase Hosting
+```bash
+npm install -g firebase-tools
+firebase login
+firebase init hosting
 ```
 
 ### 3. Build & Deploy
