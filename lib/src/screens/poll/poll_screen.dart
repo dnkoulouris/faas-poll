@@ -45,37 +45,42 @@ class PollScreen extends StatelessWidget {
                   itemCount: controller.participationsRx.length,
                   itemBuilder: (context, index) {
                     Participation participation = controller.participationsRx[index];
-                    return ListTile(
-                      title: Text(participation.name ?? '-'),
-                      leading: Text((index + 1).toString()),
-                      trailing: TextButton(
-                        onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Remove Participation'),
-                              content: Text('Are you sure you want to remove "${participation.name}"?'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context), // Cancel
-                                  child: Text('Cancel'),
-                                ),
-                                ElevatedButton(
-                                  onPressed: () {
-                                    Navigator.pop(context); // Close the dialog
-                                    ParticipationsRepository.removeParticipation(
-                                      controller.id!,
-                                      participation.id!,
-                                    );
-                                  },
-                                  child: Text('Remove'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Icon(Icons.remove),
-                      ),
+                    return Padding(
+                        padding: index == controller.participationsRx.length - 1
+                            ? const EdgeInsets.only(bottom: 128)
+                            : EdgeInsets.zero,
+                        child: ListTile(
+                          title: Text(participation.name ?? '-'),
+                          leading: Text((index + 1).toString()),
+                          trailing: TextButton(
+                            onPressed: () {
+                              showDialog(
+                                context: context,
+                                builder:
+                                    (context) =>
+                                    AlertDialog(
+                                      title: Text('Remove Participation'),
+                                      content: Text('Are you sure you want to remove "${participation.name}"?'),
+                                      actions: [
+                                        TextButton(
+                                          onPressed: () => Navigator.pop(context), // Cancel
+                                          child: Text('Cancel'),
+                                        ),
+                                        ElevatedButton(
+                                          onPressed: () {
+                                            Navigator.pop(context); // Close the dialog
+                                            ParticipationsRepository.removeParticipation(
+                                                controller.id!, participation.id!);
+                                          },
+                                          child: Text('Remove'),
+                                        ),
+                                      ],
+                                    ),
+                              );
+                            },
+                            child: Icon(Icons.remove),
+                          ),
+                        )
                     );
                   },
                 ),
@@ -114,7 +119,19 @@ class PollScreen extends StatelessWidget {
 
   void showAddParticipation(context) {
     final titleController = TextEditingController();
-
+    if (controller.participationsRx.length + 1 > 22) {
+      showDialog(
+        context: context,
+        builder:
+            (c) =>
+            AlertDialog(
+              title: Text("Error"),
+              content: Text("Total players already 22"),
+              actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))],
+            ),
+      );
+      return;
+    }
     showDialog(
       context: context,
       builder: (context) {
