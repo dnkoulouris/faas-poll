@@ -1,3 +1,5 @@
+# Football As A Service - FAAS
+
 A cross-platform **Flutter** app for organizing and participating in football match polls. Users can create and vote on match formats: **5x5**, **7x7**, or **11x11**.
 
 ---
