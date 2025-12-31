@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:football_as_a_service/src/model/participation.dart';
 import 'package:football_as_a_service/src/repository/participations_repository.dart';
@@ -20,6 +21,7 @@ class PollScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(controller.pollRx.value.title ?? ''),
+              if (FirebaseAuth.instance.currentUser != null)
               TextButton(
                 onPressed: () {
                   showEditPollNameDialog(context);
@@ -137,7 +139,20 @@ class PollScreen extends StatelessWidget {
       builder: (context) {
         return AlertDialog(
           title: Text("Add Participation"),
-          content: TextField(controller: titleController, decoration: InputDecoration(labelText: "Name")),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                "Σημαντικές οδηγίες συμμετοχής:\n\n"
+                "• Η συμμετοχή είναι αυστηρή — δεν γίνονται δεκτές ακυρώσεις την τελευταία στιγμή.\n"
+                "• Εισάγετε το πλήρες ονοματεπώνυμό σας (όχι ψευδώνυμο).\n"
+                "• Παρακαλώ προσέλθετε 15 λεπτά νωρίτερα για ζέσταμα.\n"
+                "• Το αντίτιμο να είναι έτοιμο προς εξόφληση στο άτομο που μαζεύει τα χρήματα στο τέλος του αγώνα ή να σταλεί άμεσα μέσω IRIS εκείνη την ώρα.",
+              ),
+              SizedBox(height: 12),
+              TextField(controller: titleController, decoration: InputDecoration(labelText: "Ονοματεπώνυμο"),)
+            ],
+          ),
           actions: [
             TextButton(onPressed: () => Navigator.pop(context), child: Text("Cancel")),
             ElevatedButton(

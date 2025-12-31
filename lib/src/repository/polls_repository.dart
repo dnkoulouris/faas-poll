@@ -23,4 +23,24 @@ class PollsRepository {
   static Future<void> updatePoll(Poll poll) async {
     await FirebaseFirestore.instance.collection('polls').doc(poll.id).update(poll.toMap());
   }
+
+  static Future<void> deletePoll(String id) async {
+    final pollRef = FirebaseFirestore.instance.collection('polls').doc(id);
+
+    // Delete subcollection 'participations' documents first
+    final partsColl = pollRef.collection('participations');
+    final partsSnapshot = await partsColl.get();
+    final batch = FirebaseFirestore.instance.batch();
+    for (final doc in partsSnapshot.docs) {
+      batch.delete(doc.reference);
+    }
+
+    // Commit deletions for participations (if any)
+    if (partsSnapshot.docs.isNotEmpty) {
+      await batch.commit();
+    }
+
+    // Delete the poll document
+    await pollRef.delete();
+  }
 }
