@@ -89,14 +89,39 @@ class PollScreen extends StatelessWidget {
                                     context: context,
                                     builder:
                                         (context) => AlertDialog(
-                                          title: Text('Remove Participation'),
-                                          content: Text('Are you sure you want to remove "${participation.name}"?'),
+                                          title: Row(
+                                            children: [
+                                              Padding(
+                                                padding: const EdgeInsets.all(8.0),
+                                                child: Icon(Icons.warning, size: 40,),
+                                              ),
+                                              Text('Αφαίρεση συμμετοχής'),
+                                            ],
+                                          ),
+                                          content: Column(
+                                            crossAxisAlignment: CrossAxisAlignment.start,
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+
+                                              Text(
+                                                'Πριν αφαιρεθεί η συμμετοχή "${participation.name}", να μεριμνηθεί έτσι ώστε να βρεθεί αντικαταστάτης.\n',
+                                              ),
+
+                                              Text(
+                                                  'Αυθαίρετες ακυρώσεις την τελευταία στιγμή δεν συνάδουν με τον τρόπο λειτουργίας της ομάδας'
+                                                      '.',
+                                                style: TextStyle(
+                                                  color: Colors.red
+                                                ),
+                                              )
+                                            ],
+                                          ),
                                           actions: [
-                                            TextButton(
-                                              onPressed: () => Navigator.pop(context), // Cancel
-                                              child: Text('Cancel'),
-                                            ),
                                             ElevatedButton(
+                                              onPressed: () => Navigator.pop(context), // Cancel
+                                              child: Text('Ακύρωση'),
+                                            ),
+                                            TextButton(
                                               onPressed: () {
                                                 Navigator.pop(context); // Close the dialog
                                                 ParticipationsRepository.removeParticipation(
@@ -104,7 +129,9 @@ class PollScreen extends StatelessWidget {
                                                   participation.id!,
                                                 );
                                               },
-                                              child: Text('Remove'),
+                                              child: Text('Αφαίρεση συμμετοχής', style: TextStyle(
+                                                color: Colors.grey
+                                              ),),
                                             ),
                                           ],
                                         ),
