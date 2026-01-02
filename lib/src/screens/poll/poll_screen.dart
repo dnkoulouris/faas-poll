@@ -22,12 +22,12 @@ class PollScreen extends StatelessWidget {
             children: [
               Text(controller.pollRx.value.title ?? ''),
               if (FirebaseAuth.instance.currentUser != null)
-              TextButton(
-                onPressed: () {
-                  showEditPollNameDialog(context);
-                },
-                child: Icon(Icons.edit),
-              ),
+                TextButton(
+                  onPressed: () {
+                    showEditPollNameDialog(context);
+                  },
+                  child: Icon(Icons.edit),
+                ),
             ],
           );
         }),
@@ -42,51 +42,84 @@ class PollScreen extends StatelessWidget {
       body:
           controller.id == null
               ? Container()
-              : Obx(
-                () => ListView.builder(
-                  itemCount: controller.participationsRx.length,
-                  itemBuilder: (context, index) {
-                    Participation participation = controller.participationsRx[index];
-                    return Padding(
-                        padding: index == controller.participationsRx.length - 1
-                            ? const EdgeInsets.only(bottom: 128)
-                            : EdgeInsets.zero,
-                        child: ListTile(
-                          title: Text(participation.name ?? '-'),
-                          leading: Text((index + 1).toString()),
-                          trailing: TextButton(
-                            onPressed: () {
-                              showDialog(
-                                context: context,
-                                builder:
-                                    (context) =>
-                                    AlertDialog(
-                                      title: Text('Remove Participation'),
-                                      content: Text('Are you sure you want to remove "${participation.name}"?'),
-                                      actions: [
-                                        TextButton(
-                                          onPressed: () => Navigator.pop(context), // Cancel
-                                          child: Text('Cancel'),
+              : Obx(() {
+                final totalPlayers = controller.participationsRx.length;
+
+                double totalCost = 0;
+                String fieldType = "";
+
+                if (totalPlayers >= 8 && totalPlayers <= 11) {
+                  totalCost = 68.5;
+                  fieldType = "5x5";
+                } else if (totalPlayers >= 12 && totalPlayers <= 16) {
+                  totalCost = 127.5;
+                  fieldType = "7x7";
+                } else if (totalPlayers >= 17 && totalPlayers <= 19) {
+                  totalCost = 165;
+                  fieldType = "9x9";
+                } else if (totalPlayers >= 20 && totalPlayers <= 22) {
+                  totalCost = 220;
+                  fieldType = "11x11";
+                }
+
+                String costText = "";
+                if (totalCost > 0) {
+                  final costPerPerson = totalCost / totalPlayers;
+                  costText = "${costPerPerson.toStringAsFixed(2)}€ / άτομο";
+                }
+                return Column(
+                  children: [
+                    if (totalPlayers >= 8) Text("$costText για $fieldType"),
+                    Expanded(
+                      child: ListView.builder(
+                        itemCount: controller.participationsRx.length,
+                        itemBuilder: (context, index) {
+                          Participation participation = controller.participationsRx[index];
+                          return Padding(
+                            padding:
+                                index == controller.participationsRx.length - 1
+                                    ? const EdgeInsets.only(bottom: 128)
+                                    : EdgeInsets.zero,
+                            child: ListTile(
+                              title: Text(participation.name ?? '-'),
+                              leading: Text((index + 1).toString()),
+                              trailing: TextButton(
+                                onPressed: () {
+                                  showDialog(
+                                    context: context,
+                                    builder:
+                                        (context) => AlertDialog(
+                                          title: Text('Remove Participation'),
+                                          content: Text('Are you sure you want to remove "${participation.name}"?'),
+                                          actions: [
+                                            TextButton(
+                                              onPressed: () => Navigator.pop(context), // Cancel
+                                              child: Text('Cancel'),
+                                            ),
+                                            ElevatedButton(
+                                              onPressed: () {
+                                                Navigator.pop(context); // Close the dialog
+                                                ParticipationsRepository.removeParticipation(
+                                                  controller.id!,
+                                                  participation.id!,
+                                                );
+                                              },
+                                              child: Text('Remove'),
+                                            ),
+                                          ],
                                         ),
-                                        ElevatedButton(
-                                          onPressed: () {
-                                            Navigator.pop(context); // Close the dialog
-                                            ParticipationsRepository.removeParticipation(
-                                                controller.id!, participation.id!);
-                                          },
-                                          child: Text('Remove'),
-                                        ),
-                                      ],
-                                    ),
-                              );
-                            },
-                            child: Icon(Icons.remove),
-                          ),
-                        )
-                    );
-                  },
-                ),
-              ),
+                                  );
+                                },
+                                child: Icon(Icons.remove),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ),
+                  ],
+                );
+              }),
     );
   }
 
@@ -125,8 +158,7 @@ class PollScreen extends StatelessWidget {
       showDialog(
         context: context,
         builder:
-            (c) =>
-            AlertDialog(
+            (c) => AlertDialog(
               title: Text("Error"),
               content: Text("Total players already 22"),
               actions: [TextButton(onPressed: () => Navigator.pop(context), child: Text("OK"))],
@@ -134,6 +166,7 @@ class PollScreen extends StatelessWidget {
       );
       return;
     }
+
     showDialog(
       context: context,
       builder: (context) {
@@ -143,14 +176,14 @@ class PollScreen extends StatelessWidget {
             mainAxisSize: MainAxisSize.min,
             children: [
               Text(
-                "Σημαντικές οδηγίες συμμετοχής:\n\n"
-                "• Η συμμετοχή είναι αυστηρή — δεν γίνονται δεκτές ακυρώσεις την τελευταία στιγμή.\n"
-                "• Εισάγετε το πλήρες ονοματεπώνυμό σας (όχι ψευδώνυμο).\n"
-                "• Παρακαλώ προσέλθετε 15 λεπτά νωρίτερα για ζέσταμα.\n"
+                "Οδηγίες συμμετοχής:\n\n"
+                "• Δεν ακυρώνουμε χωρίς ειδοποίηση και φροντίζουμε να βρούμε αντικαταστάστη.\n"
+                "• Εισάγετε το πλήρες ονοματεπώνυμό (όχι ψευδώνυμο).\n"
+                "• Προσέλευση 15 λεπτά πριν την έναρξη για ζέσταμα.\n"
                 "• Το αντίτιμο να είναι έτοιμο προς εξόφληση στο άτομο που μαζεύει τα χρήματα στο τέλος του αγώνα ή να σταλεί άμεσα μέσω IRIS εκείνη την ώρα.",
               ),
               SizedBox(height: 12),
-              TextField(controller: titleController, decoration: InputDecoration(labelText: "Ονοματεπώνυμο"),)
+              TextField(controller: titleController, decoration: InputDecoration(labelText: "Ονοματεπώνυμο")),
             ],
           ),
           actions: [
